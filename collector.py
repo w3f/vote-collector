@@ -55,7 +55,6 @@ HEADERS = {
 
 
 for j in range(0, MAX_PAGES):
-
     # Get data from one page of Subscan results, searching for System.remark_with_event
     # extrinsics. The request is then converted to JSON (rj variable).
 
@@ -72,7 +71,6 @@ for j in range(0, MAX_PAGES):
     rj = json.loads(r.text)
 
     for j in range(0, NUM_ITEMS_PER_PAGE):
-
         # For each item on the page, get the Address, the extrinsic ID, and for
         # what they are voting.
 
@@ -84,20 +82,18 @@ for j in range(0, MAX_PAGES):
         raw_vote = (rj2[0]['value'])
         addr = rj['data']['extrinsics'][j]['account_display']['address']
         extr = rj['data']['extrinsics'][j]['extrinsic_index']
-
+        
         if raw_vote == END_INDICATOR:
             # We have travelled back far enough, this is the beginning of the vote.
             # Print out the results.
             vote_count = 0
-            winner = "NONE"
-            highest = 0
             sorted_votes = sorted(vote_dict.items(), key=lambda vote_dict:vote_dict[1])
             for t in sorted_votes:
                 print(str(t[0]) + ": " + str(t[1]))
                 vote_count = vote_count + t[1]
             print("Total votes: " + str(vote_count))
             sys.exit(0)
-        elif raw_vote[:13] == INDICATOR:
+        elif raw_vote[:(INDICATOR_LENGTH)] == INDICATOR:
             if addr in voting_addresses:
                 # This account already voted, throw out
                 print(str(addr) + " voted already!")
@@ -105,7 +101,7 @@ for j in range(0, MAX_PAGES):
                 # Add it to list of voting addresses
                 voting_addresses[addr] = True
                 # This is a vote for a particular item
-                vote_for = raw_vote[13:].upper().strip()
+                vote_for = raw_vote[INDICATOR_LENGTH:].upper().strip()
                 print("( " + extr + " ): " + addr + " voted for " + vote_for)
                 if vote_for in vote_dict:
                     cur_val = vote_dict[vote_for]
